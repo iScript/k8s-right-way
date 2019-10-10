@@ -1,0 +1,31 @@
+minikube start
+minikube start --image-mirror-country=cn \
+    --registry-mirror=https://registry.docker-cn.com 
+minikube delete
+
+eval $(minikube docker-env)   将本地docker镜像与k8s绑定
+eval $(minikube docker-env -u)
+
+kubectl create -f mysql-deployment.yaml 
+kubectl get deployment
+kubectl delete deployment nginx-deployment3
+
+kubectl get pod
+kubectl describe pod nginx-deployment3-584c675f88-hs2p4
+kubectl logs  xx   查看错误原因
+
+
+使用本地仓库加速image 拉取
+docker pull registry
+docker run -d -p 5000:5000 -v $(pwd):/var/lib/registry —restart always —name registry registry:2
+curl http://192.168.21.122:5000/v2/_catalog
+docker tag luksa/kubia 192.168.21.122:5000/kubia-local
+docker push 192.168.21.122:5000/kubia-local
+
+
+minikube start --image-mirror-country=cn     --registry-mirror=https://registry.docker-cn.com --insecure-registry=192.168.21.122:5000
+
+
+kubectl exec -ti nginx-deployment-849c775b6c-86tzw /bin/sh
+
+k8s挂载本机目录需要先在把本机目录挂载到minikube上，因为minikube是个虚拟机

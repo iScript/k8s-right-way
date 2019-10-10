@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  selector:
+    matchLabels:
+      app: nginx-server
+  template: 
+    metadata:
+      labels:
+        app: nginx-server
+    spec:
+      containers:
+      - name: nginx-server
+        image: slnginx
+        imagePullPolicy: IfNotPresent #Always总是拉取  IfNotPresent本地有则使用本地  Never只使用本地不拉取
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-data
+          mountPath: /var/www
+      volumes:
+        - name: nginx-data
+          hostPath:
+            path: /var/app/www
+
+
+--- 
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+  #namespace: default
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    #targetPort: 80
+    protocol: TCP
+  selector:
+    app: nginx-server
+  

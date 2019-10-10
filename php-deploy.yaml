@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-server
+  template:
+    metadata:
+      labels:
+        app: php-server
+    spec:
+      containers:
+      - name: php-server
+        image: 192.168.21.122:5000/sanli_php7
+        volumeMounts:
+        - mountPath: /var/www
+          name: nginx-data
+        ports:
+        - containerPort: 9000
+      volumes:
+      - name: nginx-data
+        hostPath:
+          path: /var/app/www
+
+---
+  
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-svc
+spec:
+  selector:
+    app: php-server
+  ports:
+  - port: 9000
+    #targetPort: 9000
+    protocol: TCP

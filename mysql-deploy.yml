@@ -1,0 +1,81 @@
+# 定义持久化存储
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostpath2
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 12Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  #persistentVolumeReclaimPolicy: Recycle
+  storageClassName: "test1"
+  hostPath:
+    path: "/tmp/mysqltmp"
+
+---
+
+#申请持久化存储，用于pod
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-quest-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce #读写权限，并只能被单个node挂载
+  storageClassName: "test1" #绑定PVC和PV?
+  resources:
+    requests:
+      storage: 10Gi
+
+
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  # 策略
+  strategy:
+    type: Recreate  #停止旧版本部署新版本
+  template: # 根据此模板创建
+    metadata:
+      labels:
+        app: mysql-server
+    spec:
+      containers:
+      - image: 192.168.21.122:5000/mysql55
+        imagePullPolicy: IfNotPresent
+        name: mysql-server
+        env:
+          # Use secret in real usage
+        - name: MYSQL_ROOT_PASSWORD
+          value: c0mm0nZaq123useer
+        ports:
+        - containerPort: 3306
+          name: mysql-server
+        volumeMounts: #申请的存储挂载到这里
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-quest-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  #namespace: quests-staging-svc
+spec:
+  type: NodePort
+  ports:
+  - port: 3306
+    protocol: TCP
+  selector:
+    app: mysql-server
