@@ -29,3 +29,4 @@ minikube start --image-mirror-country=cn     --registry-mirror=https://registry.
 kubectl exec -ti nginx-deployment-849c775b6c-86tzw /bin/sh
 
 k8s挂载本机目录需要先在把本机目录挂载到minikube上，因为minikube是个虚拟机
+

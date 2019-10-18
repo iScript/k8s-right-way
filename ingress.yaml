@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: kkk.tianniuyouxi.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: node-service
+          servicePort: 8080
+      - path: /bar
+        backend:
+          serviceName: node-service
+          servicePort: 8080

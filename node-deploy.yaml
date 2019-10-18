@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: node-server
-        image: node8
+        image: registry.cn-hangzhou.aliyuncs.com/sanli001/nodeappbyykq:0.1
         imagePullPolicy: IfNotPresent #镜像存在的情况不去远程拉取
         ports:
         - containerPort: 8080
