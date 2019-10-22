@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpapp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpapp-server
+  template:
+    metadata:
+      labels:
+        app: phpapp-server
+    spec:
+      containers:
+      #部署代码
+      - name: code
+        image: registry.cn-hangzhou.aliyuncs.com/sanli001/phpappcode:0.0.4
+        volumeMounts: # 挂载目录
+        - mountPath: /data2
+          name: code
+        # - mountPath: /data2/code
+        #   name: envconfig
+          #subPath: .env  # 无法接收configmap更新
+          
+      #部署php-fpm
+      - name: php-fpm
+        image: registry.cn-hangzhou.aliyuncs.com/sanli001/phpappfpm:0.0.1
+        volumeMounts:
+        - mountPath: /var/www
+          name: code
+        ports:
+        - containerPort: 9000
+      #部署nginx
+      - name: nginx-server
+        image: registry.cn-hangzhou.aliyuncs.com/sanli001/phpappnginx:0.0.3
+        imagePullPolicy: IfNotPresent #Always总是拉取  IfNotPresent本地有则使用本地  Never只使用本地不拉取
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: code
+          mountPath: /var/www
+        - name: nginxvhost
+          mountPath: /etc/nginx/sites-available/
+      volumes:
+      # pod 共享目录，挂载代码
+      - name: code    # 相当于同一个pod共享code镜像的目录
+        emptyDir: {}  # 临时目录，会随着pod而销毁
+      # 代码的配置文件
+      # - name: envconfig
+      #   configMap:
+      #     name : test1
+      #     items:
+      #       - key: laravelenv
+      #         path: .env
+      # nginx配置文件
+      - name : nginxvhost
+        configMap:
+          name : nginxvhost1
+          items:
+            - key: server
+              path: vhost1.conf
+
+# ---
+  
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: php-svc
+# spec:
+#   selector:
+#     app: php-server
+#   ports:
+#   - port: 9000
+#     #targetPort: 9000
+#     protocol: TCP
+
+--- 
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: phpapp-service
+  #namespace: default
+spec:
+  # nodeport 本机ip对外提供服务
+  type: NodePort
+  ports:
+  - port: 80
+    #targetPort: 80
+    protocol: TCP
+  selector:
+    # 选择所有app：xxx的label
+    app: phpapp-server

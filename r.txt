@@ -14,19 +14,20 @@ kubectl get pod
 kubectl describe pod nginx-deployment3-584c675f88-hs2p4
 kubectl logs  xx   查看错误原因
 
+docker login --username=hi30234972@aliyun.com registry.cn-hangzhou.aliyuncs.com
+docker tag [ImageId] registry.cn-hangzhou.aliyuncs.com/sanli001/phpappcode:[镜像版本号]
+docker push registry.cn-hangzhou.aliyuncs.com/sanli001/phpappcode:[镜像版本号]
 
-使用本地仓库加速image 拉取
-docker pull registry
-docker run -d -p 5000:5000 -v $(pwd):/var/lib/registry —restart always —name registry registry:2
-curl http://192.168.21.122:5000/v2/_catalog
-docker tag luksa/kubia 192.168.21.122:5000/kubia-local
-docker push 192.168.21.122:5000/kubia-local
-
-
-minikube start --image-mirror-country=cn     --registry-mirror=https://registry.docker-cn.com --insecure-registry=192.168.21.122:5000
-
+minikube start --image-mirror-country=cn     --registry-mirror=https://registry.cn-hangzhou.aliyuncs.com
 
 kubectl exec -ti nginx-deployment-849c775b6c-86tzw /bin/sh
 
 k8s挂载本机目录需要先在把本机目录挂载到minikube上，因为minikube是个虚拟机
 
+
+$HOME/.kube/config
+
+
+minikube ssh 
+vim /etc/resolv.conf 
+223.5.5.5
